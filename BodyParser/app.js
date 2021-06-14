@@ -1,9 +1,8 @@
 const express = require("express");
 const nunjucks = require("nunjucks");
+const logger = require("morgan");
 const admin = require("./routes/admin");
 const contacts = require("./routes/contacts");
-const bodyParser = require("body-parser");
-
 const app = express();
 const port = 3000;
 
@@ -12,14 +11,19 @@ nunjucks.configure("templates", {
   express: app,
 });
 
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
-
 app.get("/", (req, res) => {
   res.send("express start");
 });
 
-app.use("/admin", admin);
+function vipMiddleWare(req, res, next) {
+  console.log("최우선 미들웨어");
+  next();
+}
+
+// 미들웨어 세팅
+app.use(logger("dev"));
+
+app.use("/admin", vipMiddleWare, admin);
 app.use("/contacts", contacts);
 
 app.listen(port, () => {
